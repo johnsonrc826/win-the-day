@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Win the Day</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Optional: EmailJS for email reminders (you configure keys below) -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      background: #020617;
+      border-radius: 18px;
+      padding: 20px 20px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 1px solid #1f2937;
+    }
+
+    .app-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .app-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #facc15;
+    }
+
+    .app-subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    .date {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .summary-card {
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      border: 1px solid #374151;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .summary-status {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .summary-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid #4b5563;
+    }
+
+    .summary-pill.won {
+      background: #22c55e22;
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+
+    .summary-pill.not-won {
+      background: #ef444422;
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .goal-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #d1d5db;
+      margin-bottom: 10px;
+    }
+
+    .goals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .goal-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+    }
+
+    .goal-card.completed {
+      border-color: #22c55e;
+      background: #022c22;
+    }
+
+    .goal-checkbox {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .goal-content {
+      flex: 1;
+    }
+
+    .goal-label {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .goal-description {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 3px;
+    }
+
+    .goal-tag {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.7rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      color: #9ca3af;
+    }
+
+    .streak-card {
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+
+    .streak-values {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .streak-number {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #facc15;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 999px;
+      border: none;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 10px 14px;
+      background: linear-gradient(to right, #facc15, #f97316);
+      color: #111827;
+    }
+
+    .btn-secondary {
+      padding: 10px 14px;
+      background: #020617;
+      color: #9ca3af;
+      border: 1px solid #374151;
+      flex: 0 0 auto;
+    }
+
+    .note {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    /* Settings */
+
+    .settings {
+      margin-top: 14px;
+      border-top: 1px solid #1f2937;
+      padding-top: 10px;
+    }
+
+    .settings-toggle {
+      width: 100%;
+      background: #020617;
+      color: #9ca3af;
+      border: 1px solid #374151;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .settings-panel {
+      margin-top: 10px;
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .settings-panel.open {
+      display: block;
+    }
+
+    .settings-panel h2,
+    .settings-panel h3 {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .settings-goal-row {
+      border: 1px solid #111827;
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 6px;
+    }
+
+    .settings-goal-row-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #e5e7eb;
+    }
+
+    .settings-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .settings-input,
+    .settings-textarea,
+    .settings-input-inline {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .settings-textarea {
+      resize: vertical;
+      min-height: 40px;
+    }
+
+    .settings-inline-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .settings-inline-row > div {
+      flex: 1;
+    }
+
+    .settings-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 6px;
+    }
+
+    .settings-actions button {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      text-transform: none;
+      letter-spacing: 0;
+      border-radius: 999px;
+    }
+
+    .settings-actions .primary {
+      background: #facc15;
+      color: #111827;
+    }
+
+    .settings-actions .secondary {
+      background: #020617;
+      color: #9ca3af;
+      border: 1px solid #374151;
+    }
+
+    .settings-note {
+      font-size: 0.65rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 16px 14px 18px;
+        border-radius: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="app-title">WIN THE DAY</div>
+      <div class="app-subtitle">3 key actions. Daily. Non-negotiable.</div>
+      <div class="date" id="todayDate"></div>
+    </header>
+
+    <section class="summary-card">
+      <div class="summary-main">
+        <div class="summary-title" id="summaryTitle">You haven't won the day yet.</div>
+        <div class="summary-status" id="summaryStatus"></div>
+      </div>
+      <div class="summary-pill not-won" id="summaryPill">In Progress</div>
+    </section>
+
+    <section>
+      <div class="goal-section-title">Today's Goals</div>
+      <div class="goals-list" id="goalsList">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <section class="streak-card">
+      <div><strong>Streaks</strong></div>
+      <div class="streak-values">
+        <div>
+          Current Win Streak<br/>
+          <span class="streak-number" id="currentStreak">0</span> days
+        </div>
+        <div style="text-align:right;">
+          Longest Win Streak<br/>
+          <span class="streak-number" id="longestStreak">0</span> days
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button class="btn-primary" id="markAllDone">Mark All Done</button>
+      <button class="btn-secondary" id="resetDay">Reset Today</button>
+    </section>
+
+    <div class="note">
+      Your goals, streaks, and settings are stored locally in this browser. Customize them in Settings.
+    </div>
+
+    <section class="settings">
+      <button class="settings-toggle" id="toggleSettings">
+        ⚙️ Settings & Goal Customization
+      </button>
+      <div class="settings-panel" id="settingsPanel">
+        <h2>Customize Your Goals</h2>
+        <div id="goalSettings"></div>
+
+        <h3>Daily Reminder</h3>
+        <div class="settings-inline-row">
+          <div>
+            <label class="settings-label">
+              Reminder time
+              <input type="time" id="reminderTime" class="settings-input-inline" />
+            </label>
+          </div>
+          <div>
+            <label class="settings-label">
+              Email for reminder
+              <input type="email" id="reminderEmail" class="settings-input-inline" placeholder="you@example.com" />
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-checkbox-row">
+          <input type="checkbox" id="enableBrowserCheckbox" />
+          <label for="enableBrowserCheckbox" class="settings-label" style="margin-bottom:0;">
+            Enable daily browser notification
+          </label>
+        </div>
+
+        <div class="settings-checkbox-row">
+          <input type="checkbox" id="enableEmailCheckbox" />
+          <label for="enableEmailCheckbox" class="settings-label" style="margin-bottom:0;">
+            Send daily email reminder
+          </label>
+        </div>
+
+        <div class="settings-actions">
+          <button type="button" class="secondary" id="requestNotificationPermission">
+            Request Notification Permission
+          </button>
+          <button type="button" class="primary" id="saveSettings">
+            Save Settings
+          </button>
+        </div>
+
+        <p class="settings-note">
+          Email reminders use EmailJS. You must create a free EmailJS account and fill in your service ID,
+          template ID, and public key in the code for emails to send.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ------------- CONFIG -----------------
+
+    const DEFAULT_GOALS = [
+      {
+        id: "duolingo",
+        label: "5 minutes of Duolingo",
+        description: "Learn or practice a language for at least 5 focused minutes.",
+        tag: "Mind"
+      },
+      {
+        id: "workout-100s",
+        label: "100 pushups / 100 sit-ups / 100 squats",
+        description: "Break it up however you want, just hit your total volume.",
+        tag: "Body"
+      },
+      {
+        id: "market-research",
+        label: "Market research + check investment accounts",
+        description: "Scan the markets and review your portfolio with intention.",
+        tag: "Wealth"
+      }
+    ];
+
+    const STORAGE_KEY = "winTheDayState_v2";
+
+    // EmailJS placeholders – replace with your real keys once you have them.
+    const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY_HERE";
+    const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID_HERE";
+    const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID_HERE";
+
+    // Initialize EmailJS if available
+    (function initEmailJS() {
+      try {
+        if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY_HERE") {
+          emailjs.init(EMAILJS_PUBLIC_KEY);
+        }
+      } catch (e) {
+        console.warn("EmailJS init failed:", e);
+      }
+    })();
+
+    // ------------- STATE ------------------
+
+    let state = {
+      date: null,            // "YYYY-MM-DD"
+      goals: [],             // [{id,label,description,tag,completed}]
+      currentStreak: 0,
+      longestStreak: 0,
+      lastWinDate: null,     // "YYYY-MM-DD"
+      reminderTime: "09:00", // "HH:MM"
+      reminderEmail: "",
+      browserNotificationsEnabled: false,
+      emailRemindersEnabled: false,
+      lastReminderDate: null // "YYYY-MM-DD"
+    };
+
+    // ------------- UTILITIES --------------
+
+    function formatDate(date) {
+      return date.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function getTodayKey() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function getRelativeDayKey(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          state = JSON.parse(raw);
+        } catch (e) {
+          console.error("Failed to parse stored state", e);
+        }
+      }
+      ensureGoalSchema();
+    }
+
+    function ensureGoalSchema() {
+      // If no goals saved yet, initialize from defaults
+      if (!Array.isArray(state.goals) || state.goals.length === 0) {
+        state.goals = DEFAULT_GOALS.map(g => ({
+          id: g.id,
+          label: g.label,
+          description: g.description,
+          tag: g.tag,
+          completed: false
+        }));
+      } else {
+        // Migrate old schema where goals had only {id, completed}
+        state.goals = state.goals.map(old => {
+          const def = DEFAULT_GOALS.find(d => d.id === old.id) || {};
+          return {
+            id: old.id || def.id || crypto.randomUUID(),
+            label: old.label || def.label || "Goal",
+            description: old.description || def.description || "",
+            tag: old.tag || def.tag || "",
+            completed: !!old.completed
+          };
+        });
+      }
+
+      // Defaults for new settings
+      if (!state.reminderTime) state.reminderTime = "09:00";
+      if (typeof state.browserNotificationsEnabled !== "boolean") {
+        state.browserNotificationsEnabled = false;
+      }
+      if (typeof state.emailRemindersEnabled !== "boolean") {
+        state.emailRemindersEnabled = false;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function allGoalsCompleted() {
+      return state.goals.length > 0 && state.goals.every(g => g.completed);
+    }
+
+    function updateStreaksOnNewDay(previousDateKey) {
+      const yesterdayKey = getRelativeDayKey(-1);
+      if (previousDateKey === yesterdayKey && state.lastWinDate === yesterdayKey) {
+        state.currentStreak += 1;
+      } else {
+        state.currentStreak = 1;
+      }
+      state.lastWinDate = previousDateKey;
+      if (state.currentStreak > state.longestStreak) {
+        state.longestStreak = state.currentStreak;
+      }
+    }
+
+    function initializeForToday() {
+      const todayKey = getTodayKey();
+
+      if (!state.date || state.date !== todayKey) {
+        // If we had a previous day and it was a win, update streaks
+        if (state.date && allGoalsCompleted()) {
+          updateStreaksOnNewDay(state.date);
+        }
+
+        // New day: reset date and goal completions but keep labels
+        state.date = todayKey;
+        ensureGoalSchema();
+        state.goals = state.goals.map(g => ({
+          ...g,
+          completed: false
+        }));
+
+        // Reset daily reminder flag
+        if (state.lastReminderDate !== todayKey) {
+          state.lastReminderDate = null;
+        }
+      }
+    }
+
+    // ------------- RENDER -----------------
+
+    function renderDate() {
+      const dateEl = document.getElementById("todayDate");
+      dateEl.textContent = formatDate(new Date());
+    }
+
+    function renderGoals() {
+      const container = document.getElementById("goalsList");
+      container.innerHTML = "";
+
+      state.goals.forEach(goal => {
+        const card = document.createElement("div");
+        card.className = "goal-card" + (goal.completed ? " completed" : "");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "goal-checkbox";
+        checkbox.checked = goal.completed;
+        checkbox.addEventListener("change", () => {
+          toggleGoal(goal.id, checkbox.checked);
+        });
+
+        const content = document.createElement("div");
+        content.className = "goal-content";
+
+        const label = document.createElement("div");
+        label.className = "goal-label";
+        label.textContent = goal.label;
+
+        const description = document.createElement("div");
+        description.className = "goal-description";
+        description.textContent = goal.description || "";
+
+        const tag = document.createElement("div");
+        tag.className = "goal-tag";
+        tag.textContent = goal.tag || "";
+
+        content.appendChild(label);
+        if (goal.description) content.appendChild(description);
+        if (goal.tag) content.appendChild(tag);
+
+        card.appendChild(checkbox);
+        card.appendChild(content);
+        container.appendChild(card);
+      });
+    }
+
+    function renderSummary() {
+      const titleEl = document.getElementById("summaryTitle");
+      const statusEl = document.getElementById("summaryStatus");
+      const pillEl = document.getElementById("summaryPill");
+
+      const completedCount = state.goals.filter(g => g.completed).length;
+      const total = state.goals.length;
+
+      if (completedCount === total && total > 0) {
+        titleEl.textContent = "You won the day.";
+        statusEl.textContent = "All of your goals are complete.";
+        pillEl.textContent = "Won";
+        pillEl.classList.remove("not-won");
+        pillEl.classList.add("won");
+      } else {
+        titleEl.textContent = "You haven't won the day yet.";
+        statusEl.textContent = `You've completed ${completedCount} of ${total} goals. Keep going.`;
+        pillEl.textContent = "In Progress";
+        pillEl.classList.remove("won");
+        pillEl.classList.add("not-won");
+      }
+    }
+
+    function renderStreaks() {
+      document.getElementById("currentStreak").textContent = state.currentStreak || 0;
+      document.getElementById("longestStreak").textContent = state.longestStreak || 0;
+    }
+
+    function renderSettingsPanel() {
+      const panel = document.getElementById("settingsPanel");
+      const goalsContainer = document.getElementById("goalSettings");
+      goalsContainer.innerHTML = "";
+
+      state.goals.forEach((goal, index) => {
+        const row = document.createElement("div");
+        row.className = "settings-goal-row";
+
+        const title = document.createElement("div");
+        title.className = "settings-goal-row-title";
+        title.textContent = `Goal ${index + 1}`;
+
+        const labelLabel = document.createElement("label");
+        labelLabel.className = "settings-label";
+        labelLabel.textContent = "Title";
+
+        const labelInput = document.createElement("input");
+        labelInput.className = "settings-input";
+        labelInput.value = goal.label;
+        labelLabel.appendChild(labelInput);
+
+        const descLabel = document.createElement("label");
+        descLabel.className = "settings-label";
+        descLabel.textContent = "Description (optional)";
+
+        const descInput = document.createElement("textarea");
+        descInput.className = "settings-textarea";
+        descInput.value = goal.description || "";
+        descLabel.appendChild(descInput);
+
+        const tagLabel = document.createElement("label");
+        tagLabel.className = "settings-label";
+        tagLabel.textContent = "Tag (e.g., Mind, Body, Wealth)";
+
+        const tagInput = document.createElement("input");
+        tagInput.className = "settings-input";
+        tagInput.value = goal.tag || "";
+        tagLabel.appendChild(tagInput);
+
+        row.appendChild(title);
+        row.appendChild(labelLabel);
+        row.appendChild(descLabel);
+        row.appendChild(tagLabel);
+
+        goalsContainer.appendChild(row);
+
+        // Store inputs on the element so we can read them on save
+        row._labelInput = labelInput;
+        row._descInput = descInput;
+        row._tagInput = tagInput;
+      });
+
+      // Reminders
+      document.getElementById("reminderTime").value = state.reminderTime || "09:00";
+      document.getElementById("reminderEmail").value = state.reminderEmail || "";
+      document.getElementById("enableBrowserCheckbox").checked = !!state.browserNotificationsEnabled;
+      document.getElementById("enableEmailCheckbox").checked = !!state.emailRemindersEnabled;
+    }
+
+    function render() {
+      renderDate();
+      renderGoals();
+      renderSummary();
+      renderStreaks();
+      renderSettingsPanel();
+    }
+
+    // ------------- ACTIONS ----------------
+
+    function toggleGoal(goalId, completed) {
+      const goal = state.goals.find(g => g.id === goalId);
+      if (goal) {
+        goal.completed = completed;
+      }
+      saveState();
+      renderSummary();
+    }
+
+    function markAllDone() {
+      state.goals.forEach(g => g.completed = true);
+      saveState();
+      render();
+    }
+
+    function resetToday() {
+      state.goals.forEach(g => g.completed = false);
+      saveState();
+      render();
+    }
+
+    function saveSettingsFromUI() {
+      const goalsContainer = document.getElementById("goalSettings");
+      const rows = Array.from(goalsContainer.getElementsByClassName("settings-goal-row"));
+
+      // Update goal definitions from settings
+      state.goals = rows.map((row, index) => {
+        const old = state.goals[index] || {};
+        const label = row._labelInput.value.trim() || `Goal ${index + 1}`;
+        const description = row._descInput.value.trim();
+        const tag = row._tagInput.value.trim();
+        return {
+          id: old.id || crypto.randomUUID(),
+          label,
+          description,
+          tag,
+          completed: false // reset when changing settings
+        };
+      });
+
+      // Reminder settings
+      const timeInput = document.getElementById("reminderTime");
+      const emailInput = document.getElementById("reminderEmail");
+      const browserCheckbox = document.getElementById("enableBrowserCheckbox");
+      const emailCheckbox = document.getElementById("enableEmailCheckbox");
+
+      if (timeInput.value) {
+        state.reminderTime = timeInput.value;
+      }
+      state.reminderEmail = emailInput.value.trim();
+      state.browserNotificationsEnabled = browserCheckbox.checked;
+      state.emailRemindersEnabled = emailCheckbox.checked;
+
+      saveState();
+      render();
+      startReminderTimer();
+      alert("Settings saved.");
+    }
+
+    // ------------- NOTIFICATIONS ----------
+
+    async function requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        alert("Browser notifications are not supported on this device.");
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          alert("Browser notifications enabled. Make sure the reminder time is set.");
+          state.browserNotificationsEnabled = true;
+          document.getElementById("enableBrowserCheckbox").checked = true;
+          saveState();
+          startReminderTimer();
+        } else {
+          alert("Notification permission was not granted.");
+        }
+      } catch (e) {
+        console.error("Notification permission error", e);
+      }
+    }
+
+    function sendEmailReminder() {
+      if (!state.emailRemindersEnabled || !state.reminderEmail) return;
+      if (typeof emailjs === "undefined") {
+        console.warn("EmailJS is not loaded.");
+        return;
+      }
+      if (
+        EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY_HERE" ||
+        EMAILJS_SERVICE_ID === "YOUR_SERVICE_ID_HERE" ||
+        EMAILJS_TEMPLATE_ID === "YOUR_TEMPLATE_ID_HERE"
+      ) {
+        console.warn("EmailJS keys are not configured.");
+        return;
+      }
+
+      const templateParams = {
+        to_email: state.reminderEmail,
+        subject: "Win the Day – Daily Reminder",
+        message: "Don't forget to complete your goals and win the day today!"
+      };
+
+      emailjs
+        .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+        .then(() => {
+          console.log("Email reminder sent.");
+        })
+        .catch(err => {
+          console.error("Email reminder failed:", err);
+        });
+    }
+
+    function checkReminder() {
+      const todayKey = getTodayKey();
+      if (state.lastReminderDate === todayKey) return;
+      if (!state.reminderTime) return;
+
+      const [h, m] = state.reminderTime.split(":");
+      const now = new Date();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+
+      if (hour === parseInt(h, 10) && minute === parseInt(m, 10)) {
+        // Browser notification
+        if (
+          state.browserNotificationsEnabled &&
+          "Notification" in window &&
+          Notification.permission === "granted"
+        ) {
+          try {
+            new Notification("Win the Day", {
+              body: "Time to complete your goals and win the day.",
+            });
+          } catch (e) {
+            console.error("Notification error", e);
+          }
+        }
+
+        // Email reminder
+        if (state.emailRemindersEnabled && state.reminderEmail) {
+          sendEmailReminder();
+        }
+
+        state.lastReminderDate = todayKey;
+        saveState();
+      }
+    }
+
+    function startReminderTimer() {
+      if (window._winTheDayReminderInterval) {
+        clearInterval(window._winTheDayReminderI_
