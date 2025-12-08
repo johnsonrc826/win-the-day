@@ -474,7 +474,7 @@
   </div>
 
   <script>
-    // ------------- CONFIG -----------------
+    // -------- CONFIG ---------
 
     const DEFAULT_GOALS = [
       {
@@ -497,17 +497,25 @@
       }
     ];
 
-    const STORAGE_KEY = "winTheDayState_v2";
+    const STORAGE_KEY = "winTheDayState_v3";
 
     // EmailJS placeholders – replace with your real keys once you have them.
     const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY_HERE";
     const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID_HERE";
     const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID_HERE";
 
-    // Initialize EmailJS if available
+    // basic id generator (no crypto.randomUUID for max compatibility)
+    function generateId() {
+      return "goal-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    // Initialize EmailJS if keys provided
     (function initEmailJS() {
       try {
-        if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY_HERE") {
+        if (
+          typeof emailjs !== "undefined" &&
+          EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY_HERE"
+        ) {
           emailjs.init(EMAILJS_PUBLIC_KEY);
         }
       } catch (e) {
@@ -515,7 +523,7 @@
       }
     })();
 
-    // ------------- STATE ------------------
+    // -------- STATE ----------
 
     let state = {
       date: null,            // "YYYY-MM-DD"
@@ -530,7 +538,7 @@
       lastReminderDate: null // "YYYY-MM-DD"
     };
 
-    // ------------- UTILITIES --------------
+    // -------- UTIL ----------
 
     function formatDate(date) {
       return date.toLocaleDateString(undefined, {
@@ -571,7 +579,6 @@
     }
 
     function ensureGoalSchema() {
-      // If no goals saved yet, initialize from defaults
       if (!Array.isArray(state.goals) || state.goals.length === 0) {
         state.goals = DEFAULT_GOALS.map(g => ({
           id: g.id,
@@ -581,20 +588,18 @@
           completed: false
         }));
       } else {
-        // Migrate old schema where goals had only {id, completed}
-        state.goals = state.goals.map(old => {
-          const def = DEFAULT_GOALS.find(d => d.id === old.id) || {};
+        state.goals = state.goals.map((g, idx) => {
+          const fallback = DEFAULT_GOALS[idx] || {};
           return {
-            id: old.id || def.id || crypto.randomUUID(),
-            label: old.label || def.label || "Goal",
-            description: old.description || def.description || "",
-            tag: old.tag || def.tag || "",
-            completed: !!old.completed
+            id: g.id || fallback.id || generateId(),
+            label: g.label || fallback.label || `Goal ${idx + 1}`,
+            description: g.description || fallback.description || "",
+            tag: g.tag || fallback.tag || "",
+            completed: !!g.completed
           };
         });
       }
 
-      // Defaults for new settings
       if (!state.reminderTime) state.reminderTime = "09:00";
       if (typeof state.browserNotificationsEnabled !== "boolean") {
         state.browserNotificationsEnabled = false;
@@ -614,7 +619,7 @@
 
     function updateStreaksOnNewDay(previousDateKey) {
       const yesterdayKey = getRelativeDayKey(-1);
-      if (previousDateKey === yesterdayKey && state.lastWinDate === yesterdayKey) {
+      if (state.lastWinDate && state.lastWinDate === yesterdayKey) {
         state.currentStreak += 1;
       } else {
         state.currentStreak = 1;
@@ -634,26 +639,21 @@
           updateStreaksOnNewDay(state.date);
         }
 
-        // New day: reset date and goal completions but keep labels
         state.date = todayKey;
         ensureGoalSchema();
-        state.goals = state.goals.map(g => ({
-          ...g,
-          completed: false
-        }));
+        state.goals = state.goals.map(g => ({ ...g, completed: false }));
 
-        // Reset daily reminder flag
+        // reset reminder flag
         if (state.lastReminderDate !== todayKey) {
           state.lastReminderDate = null;
         }
       }
     }
 
-    // ------------- RENDER -----------------
+    // -------- RENDER -------
 
     function renderDate() {
-      const dateEl = document.getElementById("todayDate");
-      dateEl.textContent = formatDate(new Date());
+      document.getElementById("todayDate").textContent = formatDate(new Date());
     }
 
     function renderGoals() {
@@ -679,17 +679,21 @@
         label.className = "goal-label";
         label.textContent = goal.label;
 
-        const description = document.createElement("div");
-        description.className = "goal-description";
-        description.textContent = goal.description || "";
-
-        const tag = document.createElement("div");
-        tag.className = "goal-tag";
-        tag.textContent = goal.tag || "";
-
         content.appendChild(label);
-        if (goal.description) content.appendChild(description);
-        if (goal.tag) content.appendChild(tag);
+
+        if (goal.description) {
+          const desc = document.createElement("div");
+          desc.className = "goal-description";
+          desc.textContent = goal.description;
+          content.appendChild(desc);
+        }
+
+        if (goal.tag) {
+          const tag = document.createElement("div");
+          tag.className = "goal-tag";
+          tag.textContent = goal.tag;
+          content.appendChild(tag);
+        }
 
         card.appendChild(checkbox);
         card.appendChild(content);
@@ -726,7 +730,6 @@
     }
 
     function renderSettingsPanel() {
-      const panel = document.getElementById("settingsPanel");
       const goalsContainer = document.getElementById("goalSettings");
       goalsContainer.innerHTML = "";
 
@@ -741,7 +744,6 @@
         const labelLabel = document.createElement("label");
         labelLabel.className = "settings-label";
         labelLabel.textContent = "Title";
-
         const labelInput = document.createElement("input");
         labelInput.className = "settings-input";
         labelInput.value = goal.label;
@@ -750,7 +752,6 @@
         const descLabel = document.createElement("label");
         descLabel.className = "settings-label";
         descLabel.textContent = "Description (optional)";
-
         const descInput = document.createElement("textarea");
         descInput.className = "settings-textarea";
         descInput.value = goal.description || "";
@@ -759,7 +760,6 @@
         const tagLabel = document.createElement("label");
         tagLabel.className = "settings-label";
         tagLabel.textContent = "Tag (e.g., Mind, Body, Wealth)";
-
         const tagInput = document.createElement("input");
         tagInput.className = "settings-input";
         tagInput.value = goal.tag || "";
@@ -770,15 +770,14 @@
         row.appendChild(descLabel);
         row.appendChild(tagLabel);
 
-        goalsContainer.appendChild(row);
-
-        // Store inputs on the element so we can read them on save
+        // store refs
         row._labelInput = labelInput;
         row._descInput = descInput;
         row._tagInput = tagInput;
+
+        goalsContainer.appendChild(row);
       });
 
-      // Reminders
       document.getElementById("reminderTime").value = state.reminderTime || "09:00";
       document.getElementById("reminderEmail").value = state.reminderEmail || "";
       document.getElementById("enableBrowserCheckbox").checked = !!state.browserNotificationsEnabled;
@@ -793,7 +792,7 @@
       renderSettingsPanel();
     }
 
-    // ------------- ACTIONS ----------------
+    // ------- ACTIONS -------
 
     function toggleGoal(goalId, completed) {
       const goal = state.goals.find(g => g.id === goalId);
@@ -820,22 +819,22 @@
       const goalsContainer = document.getElementById("goalSettings");
       const rows = Array.from(goalsContainer.getElementsByClassName("settings-goal-row"));
 
-      // Update goal definitions from settings
-      state.goals = rows.map((row, index) => {
+      const newGoals = rows.map((row, index) => {
         const old = state.goals[index] || {};
         const label = row._labelInput.value.trim() || `Goal ${index + 1}`;
         const description = row._descInput.value.trim();
         const tag = row._tagInput.value.trim();
         return {
-          id: old.id || crypto.randomUUID(),
+          id: old.id || generateId(),
           label,
           description,
           tag,
-          completed: false // reset when changing settings
+          completed: false
         };
       });
 
-      // Reminder settings
+      state.goals = newGoals;
+
       const timeInput = document.getElementById("reminderTime");
       const emailInput = document.getElementById("reminderEmail");
       const browserCheckbox = document.getElementById("enableBrowserCheckbox");
@@ -854,7 +853,7 @@
       alert("Settings saved.");
     }
 
-    // ------------- NOTIFICATIONS ----------
+    // ------ NOTIFICATIONS ------
 
     async function requestNotificationPermission() {
       if (!("Notification" in window)) {
@@ -864,7 +863,7 @@
       try {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-          alert("Browser notifications enabled. Make sure the reminder time is set.");
+          alert("Browser notifications enabled. Keep this page or PWA open around your reminder time.");
           state.browserNotificationsEnabled = true;
           document.getElementById("enableBrowserCheckbox").checked = true;
           saveState();
@@ -879,16 +878,12 @@
 
     function sendEmailReminder() {
       if (!state.emailRemindersEnabled || !state.reminderEmail) return;
-      if (typeof emailjs === "undefined") {
-        console.warn("EmailJS is not loaded.");
-        return;
-      }
+      if (typeof emailjs === "undefined") return;
       if (
         EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY_HERE" ||
         EMAILJS_SERVICE_ID === "YOUR_SERVICE_ID_HERE" ||
         EMAILJS_TEMPLATE_ID === "YOUR_TEMPLATE_ID_HERE"
       ) {
-        console.warn("EmailJS keys are not configured.");
         return;
       }
 
@@ -898,8 +893,7 @@
         message: "Don't forget to complete your goals and win the day today!"
       };
 
-      emailjs
-        .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
         .then(() => {
           console.log("Email reminder sent.");
         })
@@ -919,7 +913,6 @@
       const minute = now.getMinutes();
 
       if (hour === parseInt(h, 10) && minute === parseInt(m, 10)) {
-        // Browser notification
         if (
           state.browserNotificationsEnabled &&
           "Notification" in window &&
@@ -927,14 +920,13 @@
         ) {
           try {
             new Notification("Win the Day", {
-              body: "Time to complete your goals and win the day.",
+              body: "Time to complete your goals and win the day."
             });
           } catch (e) {
             console.error("Notification error", e);
           }
         }
 
-        // Email reminder
         if (state.emailRemindersEnabled && state.reminderEmail) {
           sendEmailReminder();
         }
@@ -946,4 +938,36 @@
 
     function startReminderTimer() {
       if (window._winTheDayReminderInterval) {
-        clearInterval(window._winTheDayReminderI_
+        clearInterval(window._winTheDayReminderInterval);
+      }
+      window._winTheDayReminderInterval = setInterval(checkReminder, 60 * 1000);
+    }
+
+    // -------- INIT --------
+
+    function init() {
+      loadState();
+      initializeForToday();
+      saveState();
+      render();
+
+      document.getElementById("markAllDone").addEventListener("click", markAllDone);
+      document.getElementById("resetDay").addEventListener("click", resetToday);
+
+      const toggleSettingsButton = document.getElementById("toggleSettings");
+      const settingsPanel = document.getElementById("settingsPanel");
+      toggleSettingsButton.addEventListener("click", () => {
+        settingsPanel.classList.toggle("open");
+      });
+
+      document.getElementById("saveSettings").addEventListener("click", saveSettingsFromUI);
+      document.getElementById("requestNotificationPermission")
+        .addEventListener("click", requestNotificationPermission);
+
+      startReminderTimer();
+    }
+
+    init();
+  </script>
+</body>
+</html>
