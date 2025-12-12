@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <title>Win the Day</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Optional: EmailJS for email reminders (you configure keys below) -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-
   <style>
     * {
       box-sizing: border-box;
@@ -18,7 +14,7 @@
 
     body {
       min-height: 100vh;
-      background: #0f172a;
+      background: #020617;
       color: #e5e7eb;
       display: flex;
       justify-content: center;
@@ -27,23 +23,33 @@
 
     .app {
       width: 100%;
-      max-width: 520px;
+      max-width: 900px;
       background: #020617;
       border-radius: 18px;
       padding: 20px 20px 24px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       border: 1px solid #1f2937;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      grid-gap: 16px;
+    }
+
+    @media (max-width: 800px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .app-header {
+      grid-column: 1 / -1;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .app-title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #facc15;
     }
@@ -61,37 +67,40 @@
       margin-top: 4px;
     }
 
-    .summary-card {
-      background: radial-gradient(circle at top, #1f2937, #020617);
+    .card {
+      background: #020617;
       border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      border: 1px solid #374151;
+      border: 1px solid #1f2937;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 6px;
     }
 
-    .summary-main {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .summary-title {
-      font-size: 0.95rem;
+    .card-title {
+      font-size: 0.9rem;
       font-weight: 600;
     }
 
-    .summary-status {
-      font-size: 0.8rem;
+    .card-subtitle {
+      font-size: 0.75rem;
       color: #9ca3af;
-      margin-top: 4px;
+    }
+
+    .summary-card {
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      border-color: #374151;
     }
 
     .summary-pill {
-      padding: 6px 10px;
+      padding: 4px 8px;
       border-radius: 999px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -110,18 +119,17 @@
       color: #fecaca;
     }
 
-    .goal-section-title {
-      font-size: 0.9rem;
-      font-weight: 600;
+    .summary-body {
+      font-size: 0.8rem;
       color: #d1d5db;
-      margin-bottom: 10px;
+      margin-top: 4px;
     }
 
     .goals-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-top: 6px;
     }
 
     .goal-card {
@@ -129,9 +137,9 @@
       align-items: flex-start;
       gap: 10px;
       background: #020617;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid #1f2937;
-      padding: 10px 12px;
+      padding: 8px 10px;
     }
 
     .goal-card.completed {
@@ -150,40 +158,32 @@
     }
 
     .goal-label {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
     }
 
     .goal-description {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #9ca3af;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .goal-tag {
       display: inline-block;
-      margin-top: 6px;
+      margin-top: 4px;
       font-size: 0.7rem;
-      padding: 3px 7px;
+      padding: 2px 6px;
       border-radius: 999px;
       border: 1px solid #4b5563;
       color: #9ca3af;
     }
 
-    .streak-card {
-      background: #020617;
-      border-radius: 12px;
-      border: 1px solid #1f2937;
-      padding: 10px 12px;
-      font-size: 0.8rem;
-      color: #9ca3af;
-      margin-bottom: 12px;
-    }
-
-    .streak-values {
+    .streak-row {
       display: flex;
       justify-content: space-between;
       margin-top: 6px;
+      font-size: 0.8rem;
+      color: #9ca3af;
     }
 
     .streak-number {
@@ -192,31 +192,31 @@
       color: #facc15;
     }
 
-    .controls {
+    .controls-row {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-top: 8px;
     }
 
     button {
       cursor: pointer;
-      font-size: 0.9rem;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.8rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-radius: 999px;
-      border: none;
     }
 
     .btn-primary {
       flex: 1;
-      padding: 10px 14px;
+      padding: 7px 10px;
       background: linear-gradient(to right, #facc15, #f97316);
       color: #111827;
     }
 
     .btn-secondary {
-      padding: 10px 14px;
+      padding: 7px 10px;
       background: #020617;
       color: #9ca3af;
       border: 1px solid #374151;
@@ -224,151 +224,149 @@
     }
 
     .note {
-      margin-top: 6px;
       font-size: 0.7rem;
       color: #6b7280;
-      text-align: center;
+      margin-top: 6px;
     }
 
-    /* Settings */
-
-    .settings {
-      margin-top: 14px;
-      border-top: 1px solid #1f2937;
-      padding-top: 10px;
-    }
-
-    .settings-toggle {
-      width: 100%;
-      background: #020617;
-      color: #9ca3af;
-      border: 1px solid #374151;
-      padding: 8px 10px;
+    .tier-options {
       display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .tier-pill {
+      flex: 1;
+      padding: 6px 8px;
       border-radius: 999px;
-      font-size: 0.8rem;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    .settings-panel {
-      margin-top: 10px;
+      border: 1px solid #374151;
+      font-size: 0.75rem;
+      text-align: center;
+      cursor: pointer;
       background: #020617;
-      border-radius: 12px;
-      border: 1px solid #1f2937;
-      padding: 10px 12px;
-      font-size: 0.8rem;
-      display: none;
-    }
-
-    .settings-panel.open {
-      display: block;
-    }
-
-    .settings-panel h2,
-    .settings-panel h3 {
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-      color: #e5e7eb;
-    }
-
-    .settings-goal-row {
-      border: 1px solid #111827;
-      border-radius: 10px;
-      padding: 8px;
-      margin-bottom: 6px;
-    }
-
-    .settings-goal-row-title {
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #e5e7eb;
-    }
-
-    .settings-label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 0.7rem;
       color: #9ca3af;
     }
 
-    .settings-input,
-    .settings-textarea,
-    .settings-input-inline {
+    .tier-pill.active {
+      background: #facc15;
+      border-color: #facc15;
+      color: #111827;
+      font-weight: 700;
+    }
+
+    .tier-detail {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .token-summary {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-size: 0.8rem;
+    }
+
+    .token-balance {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+
+    .token-earned {
+      color: #22c55e;
+    }
+
+    .pool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .pool-card {
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      background: #020617;
+    }
+
+    .pool-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .pool-stat {
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+
+    .pool-input-row {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .pool-input-row input {
+      flex: 1;
+      padding: 4px 6px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.75rem;
+    }
+
+    .pool-input-row button {
+      padding: 4px 6px;
+      font-size: 0.7rem;
+    }
+
+    .leaderboard-list {
+      margin-top: 6px;
+      font-size: 0.75rem;
+    }
+
+    .leader-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #111827;
+    }
+
+    .leader-row.me {
+      color: #facc15;
+    }
+
+    .leader-row:last-child {
+      border-bottom: none;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      font-size: 0.68rem;
+      color: #9ca3af;
+    }
+
+    .small-label {
+      font-size: 0.72rem;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .input-small {
       width: 100%;
+      padding: 5px 8px;
       border-radius: 8px;
       border: 1px solid #1f2937;
       background: #020617;
       color: #e5e7eb;
-      padding: 6px 8px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       margin-top: 2px;
-    }
-
-    .settings-textarea {
-      resize: vertical;
-      min-height: 40px;
-    }
-
-    .settings-inline-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .settings-inline-row > div {
-      flex: 1;
-    }
-
-    .settings-checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .settings-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      margin-top: 8px;
-      margin-bottom: 6px;
-    }
-
-    .settings-actions button {
-      flex: 1;
-      padding: 8px 10px;
-      font-size: 0.75rem;
-      text-transform: none;
-      letter-spacing: 0;
-      border-radius: 999px;
-    }
-
-    .settings-actions .primary {
-      background: #facc15;
-      color: #111827;
-    }
-
-    .settings-actions .secondary {
-      background: #020617;
-      color: #9ca3af;
-      border: 1px solid #374151;
-    }
-
-    .settings-note {
-      font-size: 0.65rem;
-      color: #6b7280;
-    }
-
-    @media (max-width: 480px) {
-      .app {
-        padding: 16px 14px 18px;
-        border-radius: 0.75rem;
-      }
     }
   </style>
 </head>
@@ -376,169 +374,252 @@
   <div class="app">
     <header class="app-header">
       <div class="app-title">WIN THE DAY</div>
-      <div class="app-subtitle">3 key actions. Daily. Non-negotiable.</div>
+      <div class="app-subtitle">Discipline • Efficiency • Friendly Competition</div>
       <div class="date" id="todayDate"></div>
     </header>
 
-    <section class="summary-card">
-      <div class="summary-main">
-        <div class="summary-title" id="summaryTitle">You haven't won the day yet.</div>
-        <div class="summary-status" id="summaryStatus"></div>
-      </div>
-      <div class="summary-pill not-won" id="summaryPill">In Progress</div>
-    </section>
-
-    <section>
-      <div class="goal-section-title">Today's Goals</div>
-      <div class="goals-list" id="goalsList">
-        <!-- Filled by JS -->
-      </div>
-    </section>
-
-    <section class="streak-card">
-      <div><strong>Streaks</strong></div>
-      <div class="streak-values">
-        <div>
-          Current Win Streak<br/>
-          <span class="streak-number" id="currentStreak">0</span> days
+    <!-- LEFT COLUMN: Goals & Discipline -->
+    <div>
+      <div class="card summary-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="summaryTitle">You haven't won the day yet.</div>
+            <div class="card-subtitle" id="summarySubtitle"></div>
+          </div>
+          <div class="summary-pill not-won" id="summaryPill">In Progress</div>
         </div>
-        <div style="text-align:right;">
-          Longest Win Streak<br/>
-          <span class="streak-number" id="longestStreak">0</span> days
+        <div class="summary-body" id="summaryBody"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Today's Goals</div>
+          <div class="card-subtitle">Tap to complete and win the day.</div>
+        </div>
+        <div class="goals-list" id="goalsList"></div>
+
+        <div class="controls-row">
+          <button class="btn-primary" id="markAllDone">Mark All Done</button>
+          <button class="btn-secondary" id="resetDay">Reset Today</button>
+        </div>
+
+        <div class="note">
+          Your data is stored locally on this device in this version. Multi-user competition and real money
+          pools require a backend & payment integration.
         </div>
       </div>
-    </section>
 
-    <section class="controls">
-      <button class="btn-primary" id="markAllDone">Mark All Done</button>
-      <button class="btn-secondary" id="resetDay">Reset Today</button>
-    </section>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Streaks</div>
+          <div class="card-subtitle">Stack wins over time.</div>
+        </div>
+        <div class="streak-row">
+          <div>
+            Current Win Streak<br/>
+            <span class="streak-number" id="currentStreak">0</span> days
+          </div>
+          <div style="text-align:right;">
+            Longest Win Streak<br/>
+            <span class="streak-number" id="longestStreak">0</span> days
+          </div>
+        </div>
+      </div>
 
-    <div class="note">
-      Your goals, streaks, and settings are stored locally in this browser. Customize them in Settings.
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Customize Your 3 Goals</div>
+          <div class="card-subtitle">Mind • Body • Wealth (or your own mix)</div>
+        </div>
+        <div id="goalSettings"></div>
+        <div class="controls-row" style="margin-top:10px;">
+          <button class="btn-primary" id="saveGoalSettings">Save Goals</button>
+        </div>
+      </div>
     </div>
 
-    <section class="settings">
-      <button class="settings-toggle" id="toggleSettings">
-        ⚙️ Settings & Goal Customization
-      </button>
-      <div class="settings-panel" id="settingsPanel">
-        <h2>Customize Your Goals</h2>
-        <div id="goalSettings"></div>
-
-        <h3>Daily Reminder</h3>
-        <div class="settings-inline-row">
+    <!-- RIGHT COLUMN: Tiers, Tokens, Pools, Leaderboard -->
+    <div>
+      <div class="card">
+        <div class="card-header">
           <div>
-            <label class="settings-label">
-              Reminder time
-              <input type="time" id="reminderTime" class="settings-input-inline" />
-            </label>
-          </div>
-          <div>
-            <label class="settings-label">
-              Email for reminder
-              <input type="email" id="reminderEmail" class="settings-input-inline" placeholder="you@example.com" />
-            </label>
+            <div class="card-title">Subscription Tier (Simulated)</div>
+            <div class="card-subtitle">Controls reward multipliers & perks.</div>
           </div>
         </div>
-
-        <div class="settings-checkbox-row">
-          <input type="checkbox" id="enableBrowserCheckbox" />
-          <label for="enableBrowserCheckbox" class="settings-label" style="margin-bottom:0;">
-            Enable daily browser notification
-          </label>
+        <div class="tier-options" id="tierOptions">
+          <div class="tier-pill" data-tier="free">Free</div>
+          <div class="tier-pill" data-tier="pro">Pro</div>
+          <div class="tier-pill" data-tier="elite">Elite</div>
         </div>
-
-        <div class="settings-checkbox-row">
-          <input type="checkbox" id="enableEmailCheckbox" />
-          <label for="enableEmailCheckbox" class="settings-label" style="margin-bottom:0;">
-            Send daily email reminder
-          </label>
+        <div class="tier-detail" id="tierDetail"></div>
+        <div class="note">
+          In this MVP, tiers are simulated. In production you'll connect this to Stripe (or similar) and store
+          the user’s tier in a database.
         </div>
-
-        <div class="settings-actions">
-          <button type="button" class="secondary" id="requestNotificationPermission">
-            Request Notification Permission
-          </button>
-          <button type="button" class="primary" id="saveSettings">
-            Save Settings
-          </button>
-        </div>
-
-        <p class="settings-note">
-          Email reminders use EmailJS. You must create a free EmailJS account and fill in your service ID,
-          template ID, and public key in the code for emails to send.
-        </p>
       </div>
-    </section>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Win Tokens & Rewards</div>
+          <div class="card-subtitle">Earn tokens from discipline, use them in pools.</div>
+        </div>
+        <div class="token-summary">
+          <div>
+            Token Balance<br/>
+            <span class="token-balance" id="tokenBalance">0</span>
+          </div>
+          <div style="text-align:right;">
+            Earned Today<br/>
+            <span class="token-earned" id="tokensEarnedToday">+0</span>
+          </div>
+        </div>
+        <div class="small-label" style="margin-top:6px;">
+          Earn rates (before multiplier):
+        </div>
+        <ul style="font-size:0.75rem; margin-left:16px; margin-top:3px; color:#9ca3af;">
+          <li>Win the Day: +10 tokens</li>
+          <li>Win the Week (5+ days): +50 tokens</li>
+          <li>Win the Month (20+ days): +300 tokens</li>
+        </ul>
+        <div class="note">
+          Multipliers by tier – Free: 1x • Pro: 1.5x • Elite: 2x
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Token Pools (Simulated)</div>
+          <div class="card-subtitle">Stake tokens in day/week/month/year pools.</div>
+        </div>
+        <div class="pool-grid" id="poolGrid">
+          <!-- Filled by JS -->
+        </div>
+        <div class="note">
+          This MVP simulates pools with tokens only. For real pooled money and multi-user competition,
+          you will connect these actions to a backend and payment processor.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Discipline Leaderboard (Sample)</div>
+          <div class="card-subtitle">See how you stack up against a sample cohort.</div>
+        </div>
+        <div class="leaderboard-list" id="leaderboardList"></div>
+        <div class="note">
+          This leaderboard is local & demo-only for now. A real leaderboard will pull from your database
+          (e.g., Firebase/Supabase) across all users in a similar goal category.
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // -------- CONFIG ---------
+    // --------- STATE & CONFIG ---------
+
+    const STORAGE_KEY = "winTheDay_v4";
 
     const DEFAULT_GOALS = [
       {
-        id: "duolingo",
+        id: "goal1",
         label: "5 minutes of Duolingo",
-        description: "Learn or practice a language for at least 5 focused minutes.",
+        description: "Intentional language practice.",
         tag: "Mind"
       },
       {
-        id: "workout-100s",
+        id: "goal2",
         label: "100 pushups / 100 sit-ups / 100 squats",
-        description: "Break it up however you want, just hit your total volume.",
+        description: "Break it up however you want.",
         tag: "Body"
       },
       {
-        id: "market-research",
+        id: "goal3",
         label: "Market research + check investment accounts",
-        description: "Scan the markets and review your portfolio with intention.",
+        description: "Scan the markets & review your portfolio.",
         tag: "Wealth"
       }
     ];
 
-    const STORAGE_KEY = "winTheDayState_v3";
-
-    // EmailJS placeholders – replace with your real keys once you have them.
-    const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY_HERE";
-    const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID_HERE";
-    const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID_HERE";
-
-    // basic id generator (no crypto.randomUUID for max compatibility)
-    function generateId() {
-      return "goal-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-    }
-
-    // Initialize EmailJS if keys provided
-    (function initEmailJS() {
-      try {
-        if (
-          typeof emailjs !== "undefined" &&
-          EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY_HERE"
-        ) {
-          emailjs.init(EMAILJS_PUBLIC_KEY);
-        }
-      } catch (e) {
-        console.warn("EmailJS init failed:", e);
+    const TIER_CONFIG = {
+      free: {
+        label: "Free",
+        multiplier: 1,
+        description:
+          "Perfect for getting started. Earn tokens at 1x rate. Participate in local pools & build discipline."
+      },
+      pro: {
+        label: "Pro",
+        multiplier: 1.5,
+        description:
+          "For serious builders. Earn tokens 1.5x faster. Designed for weekly & monthly competition."
+      },
+      elite: {
+        label: "Elite",
+        multiplier: 2,
+        description:
+          "For top performers. Earn tokens at 2x. Built for year-long challenges & larger pools (future)."
       }
-    })();
-
-    // -------- STATE ----------
-
-    let state = {
-      date: null,            // "YYYY-MM-DD"
-      goals: [],             // [{id,label,description,tag,completed}]
-      currentStreak: 0,
-      longestStreak: 0,
-      lastWinDate: null,     // "YYYY-MM-DD"
-      reminderTime: "09:00", // "HH:MM"
-      reminderEmail: "",
-      browserNotificationsEnabled: false,
-      emailRemindersEnabled: false,
-      lastReminderDate: null // "YYYY-MM-DD"
     };
 
-    // -------- UTIL ----------
+    const POOL_CONFIG = {
+      day: { label: "Daily Pool", key: "day" },
+      week: { label: "Weekly Pool", key: "week" },
+      month: { label: "Monthly Pool", key: "month" },
+      year: { label: "Yearly Pool", key: "year" }
+    };
+
+    let state = {
+      date: null,          // "YYYY-MM-DD"
+      goals: [],           // {id, label, description, tag, completed}
+      currentStreak: 0,
+      longestStreak: 0,
+      totalDaysWonThisWeek: 0,
+      totalDaysWonThisMonth: 0,
+      tokensBalance: 0,
+      tokensEarnedToday: 0,
+      tier: "free",
+      pools: {
+        day: { staked: 0, joined: false, settledForDate: null },
+        week: { staked: 0, joined: false, settledForWeek: null },
+        month: { staked: 0, joined: false, settledForMonth: null },
+        year: { staked: 0, joined: false, settledForYear: null }
+      },
+      lastWinDate: null
+    };
+
+    // --------- UTILITIES ---------
+
+    function getTodayKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function getWeekKey(date = new Date()) {
+      const d = new Date(date);
+      const day = d.getDay(); // 0-6, Sunday = 0
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+      const monday = new Date(d.setDate(diff));
+      const y = monday.getFullYear();
+      const m = String(monday.getMonth() + 1).padStart(2, "0");
+      const dayStr = String(monday.getDate()).padStart(2, "0");
+      return `${y}-W${m}${dayStr}`;
+    }
+
+    function getMonthKey(date = new Date()) {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    }
+
+    function getYearKey(date = new Date()) {
+      const d = new Date(date);
+      return String(d.getFullYear());
+    }
 
     function formatDate(date) {
       return date.toLocaleDateString(undefined, {
@@ -549,49 +630,29 @@
       });
     }
 
-    function getTodayKey() {
-      const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    }
-
-    function getRelativeDayKey(offsetDays) {
-      const d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    }
-
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         try {
-          state = JSON.parse(raw);
+          const parsed = JSON.parse(raw);
+          state = Object.assign(state, parsed);
         } catch (e) {
           console.error("Failed to parse stored state", e);
         }
       }
-      ensureGoalSchema();
-    }
 
-    function ensureGoalSchema() {
+      // Ensure goals schema
       if (!Array.isArray(state.goals) || state.goals.length === 0) {
         state.goals = DEFAULT_GOALS.map(g => ({
-          id: g.id,
-          label: g.label,
-          description: g.description,
-          tag: g.tag,
+          ...g,
           completed: false
         }));
       } else {
+        // Remap any old goals
         state.goals = state.goals.map((g, idx) => {
           const fallback = DEFAULT_GOALS[idx] || {};
           return {
-            id: g.id || fallback.id || generateId(),
+            id: g.id || fallback.id || `goal${idx + 1}`,
             label: g.label || fallback.label || `Goal ${idx + 1}`,
             description: g.description || fallback.description || "",
             tag: g.tag || fallback.tag || "",
@@ -600,13 +661,16 @@
         });
       }
 
-      if (!state.reminderTime) state.reminderTime = "09:00";
-      if (typeof state.browserNotificationsEnabled !== "boolean") {
-        state.browserNotificationsEnabled = false;
+      if (!state.pools) {
+        state.pools = {
+          day: { staked: 0, joined: false, settledForDate: null },
+          week: { staked: 0, joined: false, settledForWeek: null },
+          month: { staked: 0, joined: false, settledForMonth: null },
+          year: { staked: 0, joined: false, settledForYear: null }
+        };
       }
-      if (typeof state.emailRemindersEnabled !== "boolean") {
-        state.emailRemindersEnabled = false;
-      }
+
+      if (!state.tier) state.tier = "free";
     }
 
     function saveState() {
@@ -617,10 +681,35 @@
       return state.goals.length > 0 && state.goals.every(g => g.completed);
     }
 
+    function initForToday() {
+      const today = getTodayKey();
+
+      if (!state.date || state.date !== today) {
+        // If yesterday was a win, update streaks
+        if (state.date && state.date !== today && allGoalsCompleted()) {
+          updateStreaksOnNewDay(state.date);
+        }
+
+        state.date = today;
+        state.tokensEarnedToday = 0;
+        state.goals = state.goals.map(g => ({ ...g, completed: false }));
+      }
+    }
+
     function updateStreaksOnNewDay(previousDateKey) {
-      const yesterdayKey = getRelativeDayKey(-1);
-      if (state.lastWinDate && state.lastWinDate === yesterdayKey) {
-        state.currentStreak += 1;
+      // Compare previous win date for streaks
+      const prev = state.lastWinDate;
+      const prevDate = prev ? new Date(prev) : null;
+      const newDate = new Date(previousDateKey);
+      if (prevDate) {
+        const diffDays = Math.round(
+          (newDate - prevDate) / (1000 * 60 * 60 * 24)
+        );
+        if (diffDays === 1) {
+          state.currentStreak += 1;
+        } else {
+          state.currentStreak = 1;
+        }
       } else {
         state.currentStreak = 1;
       }
@@ -628,38 +717,64 @@
       if (state.currentStreak > state.longestStreak) {
         state.longestStreak = state.currentStreak;
       }
+
+      // Week & month counters
+      state.totalDaysWonThisWeek += 1;
+      state.totalDaysWonThisMonth += 1;
     }
 
-    function initializeForToday() {
-      const todayKey = getTodayKey();
-
-      if (!state.date || state.date !== todayKey) {
-        // If we had a previous day and it was a win, update streaks
-        if (state.date && allGoalsCompleted()) {
-          updateStreaksOnNewDay(state.date);
-        }
-
-        state.date = todayKey;
-        ensureGoalSchema();
-        state.goals = state.goals.map(g => ({ ...g, completed: false }));
-
-        // reset reminder flag
-        if (state.lastReminderDate !== todayKey) {
-          state.lastReminderDate = null;
-        }
-      }
+    function getTierMultiplier() {
+      const tierInfo = TIER_CONFIG[state.tier] || TIER_CONFIG.free;
+      return tierInfo.multiplier || 1;
     }
 
-    // -------- RENDER -------
+    function awardTokens(baseAmount, reason) {
+      const multiplier = getTierMultiplier();
+      const earned = Math.round(baseAmount * multiplier);
+      state.tokensBalance += earned;
+      state.tokensEarnedToday += earned;
+      saveState();
+      renderTokenSummary();
+      console.log(`Awarded ${earned} tokens for ${reason}`);
+    }
+
+    // --------- RENDER FUNCTIONS ---------
 
     function renderDate() {
       document.getElementById("todayDate").textContent = formatDate(new Date());
     }
 
+    function renderSummary() {
+      const titleEl = document.getElementById("summaryTitle");
+      const subtitleEl = document.getElementById("summarySubtitle");
+      const pillEl = document.getElementById("summaryPill");
+      const bodyEl = document.getElementById("summaryBody");
+
+      const completedCount = state.goals.filter(g => g.completed).length;
+      const total = state.goals.length;
+
+      if (completedCount === total && total > 0) {
+        titleEl.textContent = "You won the day.";
+        subtitleEl.textContent = "All of your goals are complete.";
+        pillEl.textContent = "Won";
+        pillEl.classList.remove("not-won");
+        pillEl.classList.add("won");
+        bodyEl.textContent =
+          "Lock this in and stack another day. Your discipline is compounding.";
+      } else {
+        titleEl.textContent = "You haven't won the day yet.";
+        subtitleEl.textContent = `You've completed ${completedCount} of ${total} goals. Stay locked in.`;
+        pillEl.textContent = "In Progress";
+        pillEl.classList.remove("won");
+        pillEl.classList.add("not-won");
+        bodyEl.textContent =
+          "Complete all 3 to win the day, earn tokens, and climb your discipline leaderboard.";
+      }
+    }
+
     function renderGoals() {
       const container = document.getElementById("goalsList");
       container.innerHTML = "";
-
       state.goals.forEach(goal => {
         const card = document.createElement("div");
         card.className = "goal-card" + (goal.completed ? " completed" : "");
@@ -679,21 +794,17 @@
         label.className = "goal-label";
         label.textContent = goal.label;
 
+        const desc = document.createElement("div");
+        desc.className = "goal-description";
+        desc.textContent = goal.description || "";
+
+        const tag = document.createElement("div");
+        tag.className = "goal-tag";
+        tag.textContent = goal.tag || "";
+
         content.appendChild(label);
-
-        if (goal.description) {
-          const desc = document.createElement("div");
-          desc.className = "goal-description";
-          desc.textContent = goal.description;
-          content.appendChild(desc);
-        }
-
-        if (goal.tag) {
-          const tag = document.createElement("div");
-          tag.className = "goal-tag";
-          tag.textContent = goal.tag;
-          content.appendChild(tag);
-        }
+        if (goal.description) content.appendChild(desc);
+        if (goal.tag) content.appendChild(tag);
 
         card.appendChild(checkbox);
         card.appendChild(content);
@@ -701,98 +812,213 @@
       });
     }
 
-    function renderSummary() {
-      const titleEl = document.getElementById("summaryTitle");
-      const statusEl = document.getElementById("summaryStatus");
-      const pillEl = document.getElementById("summaryPill");
-
-      const completedCount = state.goals.filter(g => g.completed).length;
-      const total = state.goals.length;
-
-      if (completedCount === total && total > 0) {
-        titleEl.textContent = "You won the day.";
-        statusEl.textContent = "All of your goals are complete.";
-        pillEl.textContent = "Won";
-        pillEl.classList.remove("not-won");
-        pillEl.classList.add("won");
-      } else {
-        titleEl.textContent = "You haven't won the day yet.";
-        statusEl.textContent = `You've completed ${completedCount} of ${total} goals. Keep going.`;
-        pillEl.textContent = "In Progress";
-        pillEl.classList.remove("won");
-        pillEl.classList.add("not-won");
-      }
-    }
-
     function renderStreaks() {
-      document.getElementById("currentStreak").textContent = state.currentStreak || 0;
-      document.getElementById("longestStreak").textContent = state.longestStreak || 0;
+      document.getElementById("currentStreak").textContent =
+        state.currentStreak || 0;
+      document.getElementById("longestStreak").textContent =
+        state.longestStreak || 0;
     }
 
-    function renderSettingsPanel() {
-      const goalsContainer = document.getElementById("goalSettings");
-      goalsContainer.innerHTML = "";
+    function renderGoalSettings() {
+      const container = document.getElementById("goalSettings");
+      container.innerHTML = "";
 
-      state.goals.forEach((goal, index) => {
-        const row = document.createElement("div");
-        row.className = "settings-goal-row";
+      state.goals.forEach((goal, idx) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "card";
+        wrapper.style.marginBottom = "6px";
+        wrapper.style.padding = "8px 10px";
 
         const title = document.createElement("div");
-        title.className = "settings-goal-row-title";
-        title.textContent = `Goal ${index + 1}`;
+        title.className = "card-title";
+        title.style.fontSize = "0.85rem";
+        title.textContent = `Goal ${idx + 1}`;
 
-        const labelLabel = document.createElement("label");
-        labelLabel.className = "settings-label";
+        const labelLabel = document.createElement("div");
+        labelLabel.className = "small-label";
         labelLabel.textContent = "Title";
+
         const labelInput = document.createElement("input");
-        labelInput.className = "settings-input";
+        labelInput.className = "input-small";
         labelInput.value = goal.label;
-        labelLabel.appendChild(labelInput);
 
-        const descLabel = document.createElement("label");
-        descLabel.className = "settings-label";
+        const descLabel = document.createElement("div");
+        descLabel.className = "small-label";
         descLabel.textContent = "Description (optional)";
-        const descInput = document.createElement("textarea");
-        descInput.className = "settings-textarea";
+
+        const descInput = document.createElement("input");
+        descInput.className = "input-small";
         descInput.value = goal.description || "";
-        descLabel.appendChild(descInput);
 
-        const tagLabel = document.createElement("label");
-        tagLabel.className = "settings-label";
-        tagLabel.textContent = "Tag (e.g., Mind, Body, Wealth)";
+        const tagLabel = document.createElement("div");
+        tagLabel.className = "small-label";
+        tagLabel.textContent = "Category / Tag (Mind, Body, Wealth, etc.)";
+
         const tagInput = document.createElement("input");
-        tagInput.className = "settings-input";
+        tagInput.className = "input-small";
         tagInput.value = goal.tag || "";
-        tagLabel.appendChild(tagInput);
 
-        row.appendChild(title);
-        row.appendChild(labelLabel);
-        row.appendChild(descLabel);
-        row.appendChild(tagLabel);
+        wrapper.appendChild(title);
+        wrapper.appendChild(labelLabel);
+        wrapper.appendChild(labelInput);
+        wrapper.appendChild(descLabel);
+        wrapper.appendChild(descInput);
+        wrapper.appendChild(tagLabel);
+        wrapper.appendChild(tagInput);
 
-        // store refs
-        row._labelInput = labelInput;
-        row._descInput = descInput;
-        row._tagInput = tagInput;
+        // Store for save
+        wrapper._labelInput = labelInput;
+        wrapper._descInput = descInput;
+        wrapper._tagInput = tagInput;
 
-        goalsContainer.appendChild(row);
+        container.appendChild(wrapper);
+      });
+    }
+
+    function renderTier() {
+      const options = document.querySelectorAll(".tier-pill");
+      options.forEach(opt => {
+        const t = opt.getAttribute("data-tier");
+        if (t === state.tier) {
+          opt.classList.add("active");
+        } else {
+          opt.classList.remove("active");
+        }
       });
 
-      document.getElementById("reminderTime").value = state.reminderTime || "09:00";
-      document.getElementById("reminderEmail").value = state.reminderEmail || "";
-      document.getElementById("enableBrowserCheckbox").checked = !!state.browserNotificationsEnabled;
-      document.getElementById("enableEmailCheckbox").checked = !!state.emailRemindersEnabled;
+      const tierInfo = TIER_CONFIG[state.tier] || TIER_CONFIG.free;
+      const detailEl = document.getElementById("tierDetail");
+      detailEl.textContent =
+        `${tierInfo.label} tier • Reward multiplier: ${tierInfo.multiplier}x. ` +
+        tierInfo.description;
     }
 
-    function render() {
+    function renderTokenSummary() {
+      document.getElementById("tokenBalance").textContent =
+        state.tokensBalance || 0;
+      document.getElementById("tokensEarnedToday").textContent =
+        "+" + (state.tokensEarnedToday || 0);
+    }
+
+    function renderPools() {
+      const grid = document.getElementById("poolGrid");
+      grid.innerHTML = "";
+
+      const todayKey = getTodayKey();
+      const weekKey = getWeekKey();
+      const monthKey = getMonthKey();
+      const yearKey = getYearKey();
+
+      const keys = {
+        day: todayKey,
+        week: weekKey,
+        month: monthKey,
+        year: yearKey
+      };
+
+      Object.keys(POOL_CONFIG).forEach(poolKey => {
+        const config = POOL_CONFIG[poolKey];
+        const poolState = state.pools[poolKey] || {
+          staked: 0,
+          joined: false
+        };
+
+        const card = document.createElement("div");
+        card.className = "pool-card";
+
+        const title = document.createElement("div");
+        title.className = "pool-title";
+        title.textContent = config.label;
+
+        const keyDisplay = document.createElement("div");
+        keyDisplay.className = "pool-stat";
+        keyDisplay.textContent = `Period: ${keys[poolKey]}`;
+
+        const staked = document.createElement("div");
+        staked.className = "pool-stat";
+        staked.textContent = `Your stake: ${poolState.staked || 0} tokens`;
+
+        const status = document.createElement("div");
+        status.className = "pool-stat";
+        status.textContent = poolState.joined
+          ? "Status: Joined"
+          : "Status: Not joined";
+
+        const inputRow = document.createElement("div");
+        inputRow.className = "pool-input-row";
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.placeholder = "Tokens";
+        inputRow.appendChild(input);
+
+        const btn = document.createElement("button");
+        btn.className = "btn-secondary";
+        btn.textContent = "Stake";
+        btn.addEventListener("click", () => {
+          const amount = parseInt(input.value, 10);
+          if (isNaN(amount) || amount <= 0) {
+            alert("Enter a positive token amount.");
+            return;
+          }
+          joinPool(poolKey, amount);
+        });
+        inputRow.appendChild(btn);
+
+        card.appendChild(title);
+        card.appendChild(keyDisplay);
+        card.appendChild(staked);
+        card.appendChild(status);
+        card.appendChild(inputRow);
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderLeaderboard() {
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+
+      // Demo leaderboard data — in a real app this comes from your backend.
+      const myScore = state.currentStreak + state.tokensBalance / 50;
+      const demoUsers = [
+        { name: "Discipline Dave", score: 22.5 },
+        { name: "Consistent Carla", score: 18.0 },
+        { name: "Steady Sam", score: 12.0 }
+      ];
+
+      const fullList = [
+        ...demoUsers,
+        { name: "You", score: myScore }
+      ].sort((a, b) => b.score - a.score);
+
+      fullList.forEach(user => {
+        const row = document.createElement("div");
+        row.className = "leader-row" + (user.name === "You" ? " me" : "");
+        const left = document.createElement("div");
+        left.textContent = user.name;
+        const right = document.createElement("div");
+        right.textContent = user.score.toFixed(1);
+        row.appendChild(left);
+        row.appendChild(right);
+        list.appendChild(row);
+      });
+    }
+
+    function renderAll() {
       renderDate();
-      renderGoals();
       renderSummary();
+      renderGoals();
       renderStreaks();
-      renderSettingsPanel();
+      renderGoalSettings();
+      renderTier();
+      renderTokenSummary();
+      renderPools();
+      renderLeaderboard();
     }
 
-    // ------- ACTIONS -------
+    // --------- ACTION HANDLERS ---------
 
     function toggleGoal(goalId, completed) {
       const goal = state.goals.find(g => g.id === goalId);
@@ -804,167 +1030,144 @@
     }
 
     function markAllDone() {
-      state.goals.forEach(g => g.completed = true);
+      state.goals.forEach(g => (g.completed = true));
       saveState();
-      render();
+      renderSummary();
+      renderGoals();
     }
 
     function resetToday() {
-      state.goals.forEach(g => g.completed = false);
+      state.goals.forEach(g => (g.completed = false));
+      state.tokensEarnedToday = 0;
       saveState();
-      render();
+      renderAll();
     }
 
-    function saveSettingsFromUI() {
-      const goalsContainer = document.getElementById("goalSettings");
-      const rows = Array.from(goalsContainer.getElementsByClassName("settings-goal-row"));
-
-      const newGoals = rows.map((row, index) => {
-        const old = state.goals[index] || {};
-        const label = row._labelInput.value.trim() || `Goal ${index + 1}`;
-        const description = row._descInput.value.trim();
-        const tag = row._tagInput.value.trim();
-        return {
-          id: old.id || generateId(),
+    function saveGoalSettingsFromUI() {
+      const container = document.getElementById("goalSettings");
+      const wrappers = container.querySelectorAll(".card");
+      const newGoals = [];
+      wrappers.forEach((wrapper, idx) => {
+        const label = wrapper._labelInput.value.trim() || `Goal ${idx + 1}`;
+        const description = wrapper._descInput.value.trim();
+        const tag = wrapper._tagInput.value.trim();
+        const old = state.goals[idx] || {};
+        newGoals.push({
+          id: old.id || `goal${idx + 1}`,
           label,
           description,
           tag,
           completed: false
-        };
+        });
       });
-
       state.goals = newGoals;
+      saveState();
+      renderGoals();
+      renderGoalSettings();
+      alert("Goals updated.");
+    }
 
-      const timeInput = document.getElementById("reminderTime");
-      const emailInput = document.getElementById("reminderEmail");
-      const browserCheckbox = document.getElementById("enableBrowserCheckbox");
-      const emailCheckbox = document.getElementById("enableEmailCheckbox");
+    function setTier(tier) {
+      if (!TIER_CONFIG[tier]) return;
+      state.tier = tier;
+      saveState();
+      renderTier();
+      renderTokenSummary();
+    }
 
-      if (timeInput.value) {
-        state.reminderTime = timeInput.value;
+    function handleWinLogic() {
+      // Called when we detect that all goals are completed for today
+      const today = getTodayKey();
+      if (state.lastWinDate === today) {
+        // Already processed today's win
+        return;
       }
-      state.reminderEmail = emailInput.value.trim();
-      state.browserNotificationsEnabled = browserCheckbox.checked;
-      state.emailRemindersEnabled = emailCheckbox.checked;
+
+      // Award tokens for daily win
+      awardTokens(10, "Win the Day");
+      updateStreaksOnNewDay(today);
+      state.lastWinDate = today;
+      saveState();
+      renderStreaks();
+
+      // Weekly / monthly thresholds
+      // Very light logic: if 5+ days won in "this week" -> award weekly bonus once,
+      // if 20+ days in "this month" -> award monthly bonus once.
+      // For full precision you'll want weekKey/monthKey tracking in a backend.
+      if (state.totalDaysWonThisWeek === 5) {
+        awardTokens(50, "Win the Week");
+      }
+      if (state.totalDaysWonThisMonth === 20) {
+        awardTokens(300, "Win the Month");
+      }
+
+      renderSummary();
+      renderTokenSummary();
+      renderLeaderboard();
+    }
+
+    function joinPool(poolKey, amount) {
+      if (!POOL_CONFIG[poolKey]) return;
+      if (state.tokensBalance < amount) {
+        alert("Not enough tokens to stake.");
+        return;
+      }
+
+      // Deduct tokens and add to pool
+      state.tokensBalance -= amount;
+      state.tokensEarnedToday -= amount; // purely visual; subtract from today's net
+      if (!state.pools[poolKey]) {
+        state.pools[poolKey] = { staked: 0, joined: false };
+      }
+      state.pools[poolKey].staked += amount;
+      state.pools[poolKey].joined = true;
 
       saveState();
-      render();
-      startReminderTimer();
-      alert("Settings saved.");
+      renderTokenSummary();
+      renderPools();
     }
 
-    // ------ NOTIFICATIONS ------
-
-    async function requestNotificationPermission() {
-      if (!("Notification" in window)) {
-        alert("Browser notifications are not supported on this device.");
-        return;
-      }
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-          alert("Browser notifications enabled. Keep this page or PWA open around your reminder time.");
-          state.browserNotificationsEnabled = true;
-          document.getElementById("enableBrowserCheckbox").checked = true;
-          saveState();
-          startReminderTimer();
-        } else {
-          alert("Notification permission was not granted.");
-        }
-      } catch (e) {
-        console.error("Notification permission error", e);
-      }
-    }
-
-    function sendEmailReminder() {
-      if (!state.emailRemindersEnabled || !state.reminderEmail) return;
-      if (typeof emailjs === "undefined") return;
-      if (
-        EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY_HERE" ||
-        EMAILJS_SERVICE_ID === "YOUR_SERVICE_ID_HERE" ||
-        EMAILJS_TEMPLATE_ID === "YOUR_TEMPLATE_ID_HERE"
-      ) {
-        return;
-      }
-
-      const templateParams = {
-        to_email: state.reminderEmail,
-        subject: "Win the Day – Daily Reminder",
-        message: "Don't forget to complete your goals and win the day today!"
-      };
-
-      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-        .then(() => {
-          console.log("Email reminder sent.");
-        })
-        .catch(err => {
-          console.error("Email reminder failed:", err);
-        });
-    }
-
-    function checkReminder() {
-      const todayKey = getTodayKey();
-      if (state.lastReminderDate === todayKey) return;
-      if (!state.reminderTime) return;
-
-      const [h, m] = state.reminderTime.split(":");
-      const now = new Date();
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-
-      if (hour === parseInt(h, 10) && minute === parseInt(m, 10)) {
-        if (
-          state.browserNotificationsEnabled &&
-          "Notification" in window &&
-          Notification.permission === "granted"
-        ) {
-          try {
-            new Notification("Win the Day", {
-              body: "Time to complete your goals and win the day."
-            });
-          } catch (e) {
-            console.error("Notification error", e);
-          }
-        }
-
-        if (state.emailRemindersEnabled && state.reminderEmail) {
-          sendEmailReminder();
-        }
-
-        state.lastReminderDate = todayKey;
-        saveState();
-      }
-    }
-
-    function startReminderTimer() {
-      if (window._winTheDayReminderInterval) {
-        clearInterval(window._winTheDayReminderInterval);
-      }
-      window._winTheDayReminderInterval = setInterval(checkReminder, 60 * 1000);
-    }
-
-    // -------- INIT --------
+    // --------- INIT ---------
 
     function init() {
       loadState();
-      initializeForToday();
+      initForToday();
       saveState();
-      render();
+      renderAll();
 
-      document.getElementById("markAllDone").addEventListener("click", markAllDone);
-      document.getElementById("resetDay").addEventListener("click", resetToday);
+      document
+        .getElementById("markAllDone")
+        .addEventListener("click", () => {
+          markAllDone();
+          if (allGoalsCompleted()) {
+            handleWinLogic();
+          }
+        });
 
-      const toggleSettingsButton = document.getElementById("toggleSettings");
-      const settingsPanel = document.getElementById("settingsPanel");
-      toggleSettingsButton.addEventListener("click", () => {
-        settingsPanel.classList.toggle("open");
+      document
+        .getElementById("resetDay")
+        .addEventListener("click", resetToday);
+
+      document
+        .getElementById("saveGoalSettings")
+        .addEventListener("click", saveGoalSettingsFromUI);
+
+      document.querySelectorAll(".tier-pill").forEach(el => {
+        el.addEventListener("click", () => {
+          const tier = el.getAttribute("data-tier");
+          setTier(tier);
+        });
       });
 
-      document.getElementById("saveSettings").addEventListener("click", saveSettingsFromUI);
-      document.getElementById("requestNotificationPermission")
-        .addEventListener("click", requestNotificationPermission);
-
-      startReminderTimer();
+      // If user manually completes checkboxes one by one:
+      // watch for completion and then apply win logic.
+      document.getElementById("goalsList").addEventListener("change", () => {
+        if (allGoalsCompleted()) {
+          handleWinLogic();
+        } else {
+          renderSummary();
+        }
+      });
     }
 
     init();
